@@ -27,6 +27,8 @@ Spatially resolved transcriptomics (SRT) provides the opportunity to investigate
 - Run cell\_type\_annotation\_for\_hyp3d.py to annotate cells in MERFISH-3D dataset.
 - Run cell\_type\_annotation\_for\_slideseq.py to annotate cells in Slide-seq dataset.
 
+p.s. You may need to unzip dnn\_model/checkpoint\_Slide-seq\_DM1.t7 first before running cell\_type\_annotation\_for\_slideseq.py.
+
 # Disclaimer
 
 This tool is for research purpose and not approved for clinical use.

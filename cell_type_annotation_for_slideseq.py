@@ -28,7 +28,7 @@ torch.backends.cudnn.deterministic = True
 config = {
     'data': {
         'data_dir': 'dataset/Slide_seq/',
-        'save_dir': 'model/Slide_seq/',
+        'save_dir': 'result/Slide_seq/',
         'dataset': 'Slide_seq',
         'radius_ratio': 1.0,
     },
@@ -45,7 +45,7 @@ config = {
         'batch_size': 4096,
     },
     'train': {
-        'pca_dim': 200,  # for BGI only
+        'pca_dim': 200,  # for Stereoseq only
         'k_graph': 30,
         'edge_weight': True,
         'kd_T': 1,
@@ -85,7 +85,7 @@ def spatial_classification_tool(config, data_name):
         adata = adata[(adata.obsm['spatial']**2).sum(1) < radius**2].copy()
 
     # Initalize save path.
-    model_name = f'modelGDAE-{data_name}'
+    model_name = f'spatialID-{data_name}'
     save_dir = os.path.join(save_dir, model_name)
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
@@ -100,7 +100,7 @@ def spatial_classification_tool(config, data_name):
     print('  Parameters(%s)' % (', '.join(strings)))
 
     # Preprocess data.
-    if dataset == 'BGI':
+    if dataset == 'Stereoseq':
         params = config['preprocess']
         if params['filter_mt']:
             adata.var['mt'] = adata.var_names.str.startswith(('Mt-', 'mt-'))
@@ -123,7 +123,7 @@ def spatial_classification_tool(config, data_name):
     #     Other normalization (e.g. scanpy) can be added after DNN model inference is completed.
 
     # Add noise manually.
-    if dataset != 'BGI':
+    if dataset != 'Stereoseq':
         drop_factor = (np.random.random(adata.shape) > config['preprocess']['drop_rate']) * 1.
         adata.X = adata.X * drop_factor
 
@@ -194,7 +194,7 @@ def spatial_classification_tool(config, data_name):
 
     # Construct spatial graph.
     gene_mat = torch.Tensor(adata_X)
-    if dataset in ('BGI', 'Slide_seq'):  # PCA
+    if dataset in ('Stereoseq', 'Slide_seq'):  # PCA
         u, s, v = torch.pca_lowrank(gene_mat, config['train']['pca_dim'])
         gene_mat = torch.matmul(gene_mat, v)
     cell_coo = torch.Tensor(adata.obsm['spatial'])
@@ -244,14 +244,14 @@ def spatial_classification_tool(config, data_name):
     adata.write(os.path.join(save_dir, f'{model_name}.h5ad'))
 
     # Save visualization.
-    spot_size = (30 if dataset == 'BGI' else 20)
-    if dataset == 'BGI':
+    spot_size = (30 if dataset == 'Stereoseq' else 20)
+    if dataset == 'Stereoseq':
         pseudo_top100 = adata.obs['pseudo_class'].to_numpy()
         other_classes = list(pd.value_counts(adata.obs['pseudo_class'])[100:].index)
         pseudo_top100[adata.obs['pseudo_class'].isin(other_classes)] = '_Others'
         adata.obs['pseudo_class'] = pd.Categorical(pseudo_top100)
-    sc.pl.spatial(adata, img_key=None, color=['pseudo_class'], spot_size=spot_size, show=False)
-    plt.savefig(os.path.join(save_dir, f'pseudo-{data_name}.pdf'), bbox_inches='tight', dpi=150)
+    # sc.pl.spatial(adata, img_key=None, color=['pseudo_class'], spot_size=spot_size, show=False)
+    # plt.savefig(os.path.join(save_dir, f'pseudo-{data_name}.pdf'), bbox_inches='tight', dpi=150)
     sc.pl.spatial(adata, img_key=None, color=['celltype_pred'], spot_size=spot_size, show=False)
     plt.savefig(os.path.join(save_dir, f'{model_name}.pdf'), bbox_inches='tight', dpi=150)
     print('  Predictions is saved in', os.path.join(save_dir, f'{model_name}.csv/pdf'))

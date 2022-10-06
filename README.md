@@ -43,8 +43,6 @@ p.s. You may need to unzip dnn\_model/checkpoint\_Slide-seq\_DM1.t7 first before
 
 <img src="spatialID_example_m1s1.png" width="600">
 
-(If you have any problems, please contact us on zihanwu@tencent.com)
-
 # Disclaimer
 
 This tool is for research purpose and not approved for clinical use.

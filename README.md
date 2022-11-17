@@ -31,6 +31,8 @@ Spatially resolved transcriptomics (SRT) provides the opportunity to investigate
 
 p.s. You may need to unzip dnn\_model/checkpoint\_Slide-seq\_DM1.t7 first before running cell\_type\_annotation\_for\_slideseq.py.
 
+[!!!] Note: An AttributeError saying that 'GELU' object has no attribute 'approximate' may occurs if your pytorch version is higher than 1.10.0.  You can simply downgrade pytorch to 1.8.1 or modify the source code of pytorch temporarily.
+
 # Example
 
 1. Put downloaded MERFISH data (e.g. mouse1_sample1.h5ad) in "dataset/MERFISH/" (as in Line 30 of cell\_type\_annotation\_for\_merfish.py).
